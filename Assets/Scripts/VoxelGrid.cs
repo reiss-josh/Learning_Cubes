@@ -45,13 +45,9 @@ public class VoxelGrid : MonoBehaviour
 	{
 		GameObject newVoxel = Instantiate(voxelPrefab) as GameObject;
 		newVoxel.transform.parent = transform;
-		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize);
-		newVoxel.transform.localScale = Vector3.one * voxelSize;
-		voxelMaterials[i] = newVoxel.GetComponent<MeshRenderer>().material; //paintCode
-
-		//these next two lines just shrink the voxels a little so we can see them properly
-		Vector3 voxelScale = Vector3.one * voxelSize * 0.9f;
-		newVoxel.transform.localScale = voxelScale;
+		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
+		newVoxel.transform.localScale = Vector3.one * voxelSize * 0.1f;
+		voxelMaterials[i] = newVoxel.GetComponent<MeshRenderer>().material; //paintCode;
 	}
 
 	
