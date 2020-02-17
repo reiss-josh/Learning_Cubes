@@ -53,6 +53,13 @@ public class PixelMap : MonoBehaviour
 				}
 			}
 		}
+		if (Input.GetKeyDown("space"))
+		{
+			for(int i = 0; i < chunks.Length; i++)
+			{
+				chunks[i].Refresh();
+			}
+		}
 	}
 
 	//this is code for painting the pixels
@@ -78,5 +85,17 @@ public class PixelMap : MonoBehaviour
 		chunk.transform.parent = transform;
 		chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
 		chunks[i] = chunk;
+		if (x > 0)
+		{
+			chunks[i - 1].xNeighbor = chunk;
+		}
+		if (y > 0)
+		{
+			chunks[i - chunkResolution].yNeighbor = chunk;
+			if (x > 0)
+			{
+				chunks[i - chunkResolution - 1].xyNeighbor = chunk;
+			}
+		}
 	}
 }
