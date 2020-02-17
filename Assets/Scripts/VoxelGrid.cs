@@ -21,19 +21,20 @@ public class VoxelGrid : MonoBehaviour
 		this.resolution = resolution;
 		voxelSize = size / resolution;
 
-		//this generates an array of size resolution^2
-		//would want res^3 in 3D
-		voxels = new bool[resolution * resolution];
+		voxels = new bool[resolution * resolution * resolution];
 
 		
 		voxelMaterials = new Material[voxels.Length]; //paint code
 
-		//iterate over all x,y creating voxels
-		for (int i = 0, y = 0; y < resolution; y++)
+		//iterate over all x,y,z creating voxels
+		for (int i = 0, z = 0; z < resolution; z++)
 		{
-			for (int x = 0; x < resolution; x++, i++)
+			for (int y = 0; y < resolution; y++)
 			{
-				CreateVoxel(i, x, y);
+				for (int x = 0; x < resolution; x++, i++)
+				{
+					CreateVoxel(i, x, y, z);
+				}
 			}
 		}
 
@@ -41,19 +42,19 @@ public class VoxelGrid : MonoBehaviour
 	}
 
 	//i'm not going to bother explaining this -- check the createVoxel in voxelMap
-	private void CreateVoxel(int i, int x, int y)
+	private void CreateVoxel(int i, int x, int y, int z)
 	{
 		GameObject newVoxel = Instantiate(voxelPrefab) as GameObject;
 		newVoxel.transform.parent = transform;
-		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
+		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, (z + 0.5f) * voxelSize);
 		newVoxel.transform.localScale = Vector3.one * voxelSize * 0.1f;
 		voxelMaterials[i] = newVoxel.GetComponent<MeshRenderer>().material; //paintCode;
 	}
 
 	
-	public void SetVoxel(int x, int y, bool state) //paint code
+	public void SetVoxel(int x, int y, int z, bool state) //paint code
 	{
-		voxels[y * resolution + x] = state;
+		voxels[y * resolution + z * resolution * resolution + x] = state;
 		SetVoxelColors();
 	}
 

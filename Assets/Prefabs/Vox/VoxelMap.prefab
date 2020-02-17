@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7566837362472166155
+--- !u!1 &8524773650482154397
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,41 +8,43 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7566837362472166157}
-  - component: {fileID: 6025315535429627256}
+  - component: {fileID: 8524773650482154403}
+  - component: {fileID: 8524773650482154402}
   m_Layer: 0
-  m_Name: VoxelGrid
+  m_Name: VoxelMap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7566837362472166157
+--- !u!4 &8524773650482154403
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7566837362472166155}
+  m_GameObject: {fileID: 8524773650482154397}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.617891, y: 2.3968356, z: 11.338794}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6025315535429627256
+--- !u!114 &8524773650482154402
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7566837362472166155}
+  m_GameObject: {fileID: 8524773650482154397}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c509060f535d5d044bfe9b5841556696, type: 3}
+  m_Script: {fileID: 11500000, guid: d8f16d418e590d84b9ea13c1af98fd9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  voxelPrefab: {fileID: 4584554225718123269, guid: 9502a5cfc7636f941b57d2cfbd63a83e,
+  size: 2
+  voxelResolution: 2
+  chunkResolution: 1
+  voxelGridPrefab: {fileID: 6025315535429627256, guid: 522c0805e1d4d784d8ff82986bc06a1e,
     type: 3}
-  resolution: 8

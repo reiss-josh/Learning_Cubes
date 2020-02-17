@@ -25,12 +25,15 @@ public class VoxelMap : MonoBehaviour
 		//iterate over x,y coordinates, spawning chunks.
 		//for resolution n, this generates n^2 chunks.
 		//it'd be n^3 in 3d
-		chunks = new VoxelGrid[chunkResolution * chunkResolution];
-		for (int i = 0, y = 0; y < chunkResolution; y++)
+		chunks = new VoxelGrid[chunkResolution * chunkResolution * chunkResolution];
+		for (int i = 0, z = 0; z < chunkResolution; z++)
 		{
-			for (int x = 0; x < chunkResolution; x++, i++)
+			for (int y = 0; y < chunkResolution; y++)
 			{
-				CreateChunk(i, x, y);
+				for (int x = 0; x < chunkResolution; x++, i++)
+				{
+					CreateChunk(i, x, y, z);
+				}
 			}
 		}
 
@@ -39,7 +42,8 @@ public class VoxelMap : MonoBehaviour
 		box.size = new Vector3(size, size);
 	}
 
-	//this is code for painting the voxels
+	//broken for 3d
+	//in update, we check if a raycast from the mouse hits the voxels
 	private void Update()
 	{
 		if (Input.GetMouseButton(0))
@@ -53,30 +57,55 @@ public class VoxelMap : MonoBehaviour
 				}
 			}
 		}
+		if (Input.GetKeyDown("space"))
+		{
+			StartCoroutine(SetAllChnk());
+		}
 	}
 
-	//this is code for painting the voxels
+	//debug function that sets one cube in each chunk to black
+	public IEnumerator SetAllChnk(int xv = 0, int yv = 0, int zv = 0)
+	{
+		WaitForSeconds wait = new WaitForSeconds(0.5f);
+		for (int z = 0; z < chunkResolution; z++)
+		{
+			for (int y = 0; y < chunkResolution; y++)
+			{
+				for (int x = 0; x < chunkResolution; x++)
+				{
+					chunks[x + y * chunkResolution + (z * chunkResolution * chunkResolution)].SetVoxel(xv,yv,zv,true);
+					yield return wait;
+				}
+			}
+		}
+	}
+
+	//editVoxel actually sets the voxel and recolors it
+	//fairly certain this doesn't work right in 3d
 	private void EditVoxels(Vector3 point)
 	{
 		int voxelX = (int)((point.x + halfSize) / voxelSize);
 		int voxelY = (int)((point.y + halfSize) / voxelSize);
+		int voxelZ = (int)((point.z + halfSize) / voxelSize);
 		int chunkX = voxelX / voxelResolution;
 		int chunkY = voxelY / voxelResolution;
-		Debug.Log(voxelX + ", " + voxelY + " in chunk " + chunkX + ", " + chunkY);
+		int chunkZ = voxelZ / voxelResolution;
+		Debug.Log(voxelX + ", " + voxelY + ", " + voxelZ + "in chunk " + chunkX + ", " + chunkY);
 		voxelX -= chunkX * voxelResolution;
 		voxelY -= chunkY * voxelResolution;
-		chunks[chunkY * chunkResolution + chunkX].SetVoxel(voxelX, voxelY, true);
+		voxelZ -= chunkZ * voxelResolution;
+		chunks[(chunkZ * chunkResolution * chunkResolution) + (chunkY * chunkResolution) + chunkX].SetVoxel(voxelX, voxelY, voxelZ, true);
 	}
 
 	//here we actually create the chunk.
-	//this function takes an i (number of chunks created thus far), and an (x,y) point
+	//this function takes an i (number of chunks created thus far), and an (x,y,z) point
 	//we instantiate the grid prefab, then set its position relative to the voxelMap
-	private void CreateChunk(int i, int x, int y)
+	private void CreateChunk(int i, int x, int y, int z)
 	{
 		VoxelGrid chunk = Instantiate(voxelGridPrefab) as VoxelGrid;
 		chunk.Initialize(voxelResolution, chunkSize);
 		chunk.transform.parent = transform;
-		chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
+		chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize, z * chunkSize - halfSize);
 		chunks[i] = chunk;
 	}
 }
