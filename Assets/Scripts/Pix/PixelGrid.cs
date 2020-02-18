@@ -6,21 +6,19 @@ using UnityEngine;
 public class PixelGrid : MonoBehaviour
 {
 	public GameObject pixelPrefab;
-	public PixelGrid xNeighbor, yNeighbor, xyNeighbor;
+	public PixelGrid xNeighbor, yNeighbor, xyNeighbor; //edit for 3d
 	public int resolution;
 
 	private Pixel[] pixels;
 	private float pixelSize, gridSize;
 	private List<Vector3> vertices;
 	private List<int> triangles;
-
-	private Pixel dummyX, dummyY, dummyT;
-
-	private Material[] pixelMaterials; //paint code
+	private Pixel dummyX, dummyY, dummyT; //edit for 3d
+	private Material[] pixelMaterials;
 	private Mesh mesh;
 
 	
-	//this function takes some resolution (how many cubes in this chunk), and some size (the size of the cubes)
+	//this function takes some resolution (how many cubes per chunk), and some size (the size of the cubes)
 	public void Initialize(int resolution, float size)
 	{
 		this.resolution = resolution;
@@ -36,7 +34,8 @@ public class PixelGrid : MonoBehaviour
 		dummyY = new Pixel();
 		dummyT = new Pixel();
 
-		//iterate over all x,y creating pixels
+		//edit for 3d
+		//create pixels at all points in chunk
 		for (int i = 0, y = 0; y < resolution; y++)
 		{
 			for (int x = 0; x < resolution; x++, i++)
@@ -48,13 +47,14 @@ public class PixelGrid : MonoBehaviour
 		SetPixelColors(); //paint code
 
 		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
-		mesh.name = "VoxelGrid Mesh";
+		mesh.name = "PixelGrid Mesh";
 		vertices = new List<Vector3>();
 		triangles = new List<int>();
 		Refresh();
 	}
 
-	//i'm not going to bother explaining this -- check the createPixel in pixelMap
+	//edit for 3d
+	//creates a pixel at a given (x,y)
 	private void CreatePixel(int i, int x, int y)
 	{
 		GameObject newPixel = Instantiate(pixelPrefab) as GameObject;
@@ -65,12 +65,15 @@ public class PixelGrid : MonoBehaviour
 		pixels[i] = new Pixel(x, y, pixelSize);
 	}
 
-	public void SetPixel(int x, int y, bool state) //paint code
+	//edit for 3d
+	//sets a given pixel to some state
+	public void SetPixel(int x, int y, bool state)
 	{
 		pixels[y * resolution + x].state = state;
 		SetPixelColors();
 	}
 
+	//iterates over all pixels -- for a given state, set a given color
 	private void SetPixelColors() //paint code
 	{
 		for (int i = 0; i < pixels.Length; i++)
@@ -79,12 +82,14 @@ public class PixelGrid : MonoBehaviour
 		}
 	}
 
+	//update all pixels in this chunk
 	public void Refresh()
 	{
 		SetPixelColors();
 		Triangulate();
 	}
 
+	//edit for 3d
 	private void Triangulate()
 	{
 		vertices.Clear();
@@ -102,6 +107,7 @@ public class PixelGrid : MonoBehaviour
 		mesh.triangles = triangles.ToArray();
 	}
 
+	//edit for 3d
 	private void TriangulateCellRows()
 	{
 		int cells = resolution - 1;
@@ -122,6 +128,7 @@ public class PixelGrid : MonoBehaviour
 		}
 	}
 
+	//edit for 3d
 	private void TriangulateGapCell(int i)
 	{
 		Pixel dummySwap = dummyT;
@@ -131,6 +138,7 @@ public class PixelGrid : MonoBehaviour
 		TriangulateCell(pixels[i], dummyT, pixels[i + resolution], dummyX);
 	}
 
+	//edit for 3d
 	private void TriangulateGapRow()
 	{
 		dummyY.BecomeYDummyOf(yNeighbor.pixels[0], gridSize);
@@ -153,6 +161,7 @@ public class PixelGrid : MonoBehaviour
 		}
 	}
 
+	//edit for 3d
 	private void TriangulateCell(Pixel a, Pixel b, Pixel c, Pixel d)
 	{
 		int cellType = 0;
@@ -227,6 +236,7 @@ public class PixelGrid : MonoBehaviour
 		}
 	}
 
+	//edit for 3d
 	private void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
 	{
 		int vertexIndex = vertices.Count;
@@ -238,6 +248,7 @@ public class PixelGrid : MonoBehaviour
 		triangles.Add(vertexIndex + 2);
 	}
 
+	//edit for 3d
 	private void AddQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
 	{
 		int vertexIndex = vertices.Count;
@@ -253,6 +264,7 @@ public class PixelGrid : MonoBehaviour
 		triangles.Add(vertexIndex + 3);
 	}
 
+	//edit for 3d
 	private void AddPentagon(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 e)
 	{
 		int vertexIndex = vertices.Count;

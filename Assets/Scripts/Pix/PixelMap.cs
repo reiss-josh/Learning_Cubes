@@ -12,7 +12,6 @@ public class PixelMap : MonoBehaviour
 
 	//store an array of PixelGrids -- these are our chunks
 	private PixelGrid[] chunks;
-
 	private float chunkSize, pixelSize, halfSize;
 
 	private void Awake()
@@ -21,10 +20,7 @@ public class PixelMap : MonoBehaviour
 		chunkSize = size / chunkResolution;
 		pixelSize = chunkSize / pixelResolution;
 
-		//create an array of chunkRes * chunkRes (x * y)
-		//iterate over x,y coordinates, spawning chunks.
-		//for resolution n, this generates n^2 chunks.
-		//it'd be n^3 in 3d
+		//edit for 3d
 		chunks = new PixelGrid[chunkResolution * chunkResolution];
 		for (int i = 0, y = 0; y < chunkResolution; y++)
 		{
@@ -33,15 +29,13 @@ public class PixelMap : MonoBehaviour
 				CreateChunk(i, x, y);
 			}
 		}
-
-		//this is code for painting the pixels
 		BoxCollider box = gameObject.AddComponent<BoxCollider>();
-		box.size = new Vector3(size, size);
+		box.size = new Vector3(size, size); //edit for 3d
 	}
 
-	//this is code for painting the pixels
 	private void Update()
 	{
+		//color with lmouse
 		if (Input.GetMouseButton(0))
 		{
 			RaycastHit hitInfo;
@@ -53,6 +47,7 @@ public class PixelMap : MonoBehaviour
 				}
 			}
 		}
+		//update all chunks with space
 		if (Input.GetKeyDown("space"))
 		{
 			for(int i = 0; i < chunks.Length; i++)
@@ -62,7 +57,7 @@ public class PixelMap : MonoBehaviour
 		}
 	}
 
-	//this is code for painting the pixels
+	//edit for 3d
 	private void EditPixels(Vector3 point)
 	{
 		int pixelX = (int)((point.x + halfSize) / pixelSize);
@@ -75,8 +70,8 @@ public class PixelMap : MonoBehaviour
 		chunks[chunkY * chunkResolution + chunkX].SetPixel(pixelX, pixelY, true);
 	}
 
-	//here we actually create the chunk.
-	//this function takes an i (number of chunks created thus far), and an (x,y) point
+	//edit for 3d
+	//takes an int i (number of chunks created thus far), and an (x,y) point
 	//we instantiate the grid prefab, then set its position relative to the pixelMap
 	private void CreateChunk(int i, int x, int y)
 	{

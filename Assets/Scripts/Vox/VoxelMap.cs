@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class VoxelMap : MonoBehaviour
 {
-
 	public float size = 2f;
 	public int voxelResolution = 8;
 	public int chunkResolution = 2;
@@ -12,7 +11,6 @@ public class VoxelMap : MonoBehaviour
 
 	//store an array of VoxelGrids -- these are our chunks
 	private VoxelGrid[] chunks;
-
 	private float chunkSize, voxelSize, halfSize;
 
 	private void Awake()
@@ -20,12 +18,8 @@ public class VoxelMap : MonoBehaviour
 		halfSize = size * 0.5f;
 		chunkSize = size / chunkResolution;
 		voxelSize = chunkSize / voxelResolution;
-
-		//create an array of chunkRes * chunkRes (x * y)
-		//iterate over x,y coordinates, spawning chunks.
-		//for resolution n, this generates n^2 chunks.
-		//it'd be n^3 in 3d
 		chunks = new VoxelGrid[chunkResolution * chunkResolution * chunkResolution];
+
 		for (int i = 0, z = 0; z < chunkResolution; z++)
 		{
 			for (int y = 0; y < chunkResolution; y++)
@@ -36,16 +30,13 @@ public class VoxelMap : MonoBehaviour
 				}
 			}
 		}
-
-		//this is code for painting the voxels
-		BoxCollider box = gameObject.AddComponent<BoxCollider>();
-		box.size = new Vector3(size, size);
+		BoxCollider box = gameObject.AddComponent<BoxCollider>(); //this collider is being used for the draw raycast -- will that be a problem??
+		box.size = new Vector3(size, size, size); //edit for 3d
 	}
 
-	//broken for 3d
-	//in update, we check if a raycast from the mouse hits the voxels
 	private void Update()
 	{
+		//color with lmouse
 		if (Input.GetMouseButton(0))
 		{
 			RaycastHit hitInfo;
@@ -57,31 +48,17 @@ public class VoxelMap : MonoBehaviour
 				}
 			}
 		}
+		//update all chunks with space
 		if (Input.GetKeyDown("space"))
 		{
-			StartCoroutine(SetAllChnk());
-		}
-	}
-
-	//debug function that sets one cube in each chunk to black
-	public IEnumerator SetAllChnk(int xv = 0, int yv = 0, int zv = 0)
-	{
-		WaitForSeconds wait = new WaitForSeconds(0.5f);
-		for (int z = 0; z < chunkResolution; z++)
-		{
-			for (int y = 0; y < chunkResolution; y++)
+			for (int i = 0; i < chunks.Length; i++)
 			{
-				for (int x = 0; x < chunkResolution; x++)
-				{
-					chunks[x + y * chunkResolution + (z * chunkResolution * chunkResolution)].SetVoxel(xv,yv,zv,true);
-					yield return wait;
-				}
+				chunks[i].Refresh();
 			}
 		}
 	}
 
-	//editVoxel actually sets the voxel and recolors it
-	//fairly certain this doesn't work right in 3d
+	//edit for 3d -- done?
 	private void EditVoxels(Vector3 point)
 	{
 		int voxelX = (int)((point.x + halfSize) / voxelSize);
@@ -90,15 +67,15 @@ public class VoxelMap : MonoBehaviour
 		int chunkX = voxelX / voxelResolution;
 		int chunkY = voxelY / voxelResolution;
 		int chunkZ = voxelZ / voxelResolution;
-		Debug.Log(voxelX + ", " + voxelY + ", " + voxelZ + "in chunk " + chunkX + ", " + chunkY);
+		Debug.Log(voxelX + ", " + voxelY + ", " + voxelZ + " in chunk " + chunkX + ", " + chunkY + ", " + chunkZ);
 		voxelX -= chunkX * voxelResolution;
 		voxelY -= chunkY * voxelResolution;
 		voxelZ -= chunkZ * voxelResolution;
-		chunks[(chunkZ * chunkResolution * chunkResolution) + (chunkY * chunkResolution) + chunkX].SetVoxel(voxelX, voxelY, voxelZ, true);
+		chunks[chunkZ * chunkResolution * chunkResolution + chunkY * chunkResolution + chunkX].SetVoxel(voxelX, voxelY, voxelZ, true);
 	}
 
-	//here we actually create the chunk.
-	//this function takes an i (number of chunks created thus far), and an (x,y,z) point
+	//edit for 3d
+	//takes an int i (number of chunks created thus far), and an (x,y) point
 	//we instantiate the grid prefab, then set its position relative to the voxelMap
 	private void CreateChunk(int i, int x, int y, int z)
 	{
@@ -107,5 +84,35 @@ public class VoxelMap : MonoBehaviour
 		chunk.transform.parent = transform;
 		chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize, z * chunkSize - halfSize);
 		chunks[i] = chunk;
+		if (x > 0)
+		{
+			chunks[i - 1].xNeighbor = chunk;
+		}
+		if (y > 0)
+		{
+			chunks[i - chunkResolution].yNeighbor = chunk;
+			if (x > 0)
+			{
+				chunks[i - chunkResolution - 1].xyNeighbor = chunk;
+			}
+		}
+		if (z > 0)
+		{
+			int hmm = chunkResolution; //i'm not sure what this needs to be
+			chunks[i - hmm].zNeighbor = chunk;
+
+			if (y > 0)
+			{
+				chunks[i - hmm - chunkResolution].yzNeighbor = chunk;
+				if (x > 0)
+				{
+					chunks[i - hmm - chunkResolution - 1].xyzNeighbor = chunk;
+				}
+			}
+			if (x > 0)
+			{
+				chunks[i - hmm - - 1].xzNeighbor = chunk;
+			}
+		}
 	}
 }

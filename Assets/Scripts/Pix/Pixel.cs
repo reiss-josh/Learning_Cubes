@@ -5,8 +5,9 @@ using System;
 public class Pixel
 {
 	public bool state;
-	public Vector2 position, xEdgePosition, yEdgePosition;
+	public Vector2 position, xEdgePosition, yEdgePosition; //edit for 3d
 
+	//edit for 3d
 	public Pixel(int x, int y, float size)
 	{
 		position.x = (x + 0.5f) * size;
@@ -20,6 +21,7 @@ public class Pixel
 
 	public Pixel() { }
 
+	//edit for 3d
 	public void BecomeXDummyOf(Pixel pixel, float offset)
 	{
 		state = pixel.state;
@@ -31,6 +33,7 @@ public class Pixel
 		yEdgePosition.x += offset;
 	}
 
+	//edit for 3d
 	public void BecomeYDummyOf(Pixel pixel, float offset)
 	{
 		state = pixel.state;
@@ -42,6 +45,7 @@ public class Pixel
 		yEdgePosition.y += offset;
 	}
 
+	//edit for 3d
 	public void BecomeXYDummyOf(Pixel pixel, float offset)
 	{
 		state = pixel.state;
