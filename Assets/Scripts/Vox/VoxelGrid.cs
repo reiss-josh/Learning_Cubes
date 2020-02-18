@@ -8,7 +8,9 @@ public class VoxelGrid : MonoBehaviour
 	public GameObject voxelPrefab;
 	public VoxelGrid xNeighbor, yNeighbor, zNeighbor, xyNeighbor, xzNeighbor, yzNeighbor, xyzNeighbor;
 	public int resolution;
+	private int resSqr;
 
+	private static int [,] triTable = Lookup.triangulation;
 	private Voxel[] voxels;
 	private float voxelSize, gridSize;
 	private List<Vector3> vertices;
@@ -17,15 +19,15 @@ public class VoxelGrid : MonoBehaviour
 	private Material[] voxelMaterials;
 	private Mesh mesh;
 
-
 	//this function takes some resolution (how many cubes per chunk), and some size (the size of the cubes)
 	public void Initialize(int resolution, float size)
 	{
 		this.resolution = resolution;
+		this.resSqr = (resolution * resolution);
 		voxelSize = size / resolution;
 		gridSize = size;
 
-		voxels = new Voxel[resolution * resolution * resolution];
+		voxels = new Voxel[resolution * resSqr];
 		voxelMaterials = new Material[voxels.Length]; //paint code
 
 		dummyX = new Voxel();
@@ -68,7 +70,7 @@ public class VoxelGrid : MonoBehaviour
 	//sets a given voxel to some state
 	public void SetVoxel(int x, int y, int z, bool state)
 	{
-		voxels[z * resolution * resolution + y * resolution + x].state = state;
+		voxels[z * resSqr + y * resolution + x].state = state;
 		SetVoxelColors();
 	}
 
@@ -95,17 +97,34 @@ public class VoxelGrid : MonoBehaviour
 		triangles.Clear();
 		mesh.Clear();
 
+		/* handle chunk gaps
+		 * 
 		if (xNeighbor != null)
-		{ dummyX.BecomeXDummyOf(xNeighbor.voxels[0], gridSize); }
+			{ dummyX.BecomeXDummyOf(xNeighbor.voxels[0], gridSize); }
 		if (yNeighbor != null)
-		{ TriangulateGapRow(); }
+			{ TriangulateGapRow(); }
 		if (zNeighbor != null)
-		{ /*do something here*/; }
-
+			{
+				//do something here;
+			}
+		*/
+		
 		TriangulateCellRows();
 
 		mesh.vertices = vertices.ToArray();
 		mesh.triangles = triangles.ToArray();
+	}
+
+	private Voxel[] genDefaultVerts(int i)
+	{
+		return new Voxel[] {voxels[i], //0
+							voxels[i + 1], //1
+							voxels[i + resolution], //2
+							voxels[i + resolution + 1], //3
+							voxels[i + resSqr], //4
+							voxels[i + resSqr + 1], //5
+							voxels[i + resSqr + resolution], //6
+							voxels[i + resSqr + resolution + 1]}; //7
 	}
 
 	//edit for 3d
@@ -114,29 +133,31 @@ public class VoxelGrid : MonoBehaviour
 		int cells = resolution - 1;
 		for (int i = 0, y = 0; y < cells; y++, i++)
 		{
+			Voxel[] passArr = genDefaultVerts(i);
 			for (int x = 0; x < cells; x++, i++)
 			{
-				TriangulateCell(
-					voxels[i],
-					voxels[i + 1],
-					voxels[i + resolution],
-					voxels[i + resolution + 1]);
+				TriangulateCell(passArr);
 			}
 			if (xNeighbor != null)
 			{
-				TriangulateGapCell(i);
+				//handle chunk gaps
+				//TriangulateGapCell(i, passArr);
 			}
 		}
 	}
 
-	//edit for 3d
-	private void TriangulateGapCell(int i)
+	/* handle chunk gaps -- edit for 3d
+
+	private void TriangulateGapCell(int i, Voxel[] passArr)
 	{
 		Voxel dummySwap = dummyT;
 		dummySwap.BecomeXDummyOf(xNeighbor.voxels[i + 1], gridSize);
 		dummyT = dummyX;
 		dummyX = dummySwap;
-		TriangulateCell(voxels[i], dummyT, voxels[i + resolution], dummyX);
+		passArr[1] = dummyT;
+		passArr[3] = dummyX;
+		//prob need to do something to 4-7
+		TriangulateCell(passArr);
 	}
 
 	//edit for 3d
@@ -152,35 +173,38 @@ public class VoxelGrid : MonoBehaviour
 			dummySwap.BecomeYDummyOf(yNeighbor.voxels[x + 1], gridSize);
 			dummyT = dummyY;
 			dummyY = dummySwap;
-			TriangulateCell(voxels[x + offset], voxels[x + offset + 1], dummyT, dummyY);
+			Voxel[] passArr = genDefaultVerts(x + offset);
+			passArr[2] = dummyT;
+			passArr[3] = dummyY;
+			// prob need to do something to 4-7
+			TriangulateCell(passArr);
 		}
 
 		if (xNeighbor != null)
 		{
 			dummyT.BecomeXYDummyOf(xyNeighbor.voxels[0], gridSize);
-			TriangulateCell(voxels[voxels.Length - 1], dummyX, dummyY, dummyT);
+			Voxel[] passArr = genDefaultVerts(voxels.Length - 1);
+			passArr[1] = dummyX;
+			passArr[2] = dummyY;
+			passArr[3] = dummyT;
+			TriangulateCell(passArr);
 		}
 	}
+	*/
 
 	//edit for 3d
-	private void TriangulateCell(Voxel a, Voxel b, Voxel c, Voxel d)
+	private void TriangulateCell(Voxel[] CubeVerts)
 	{
+		Voxel a = CubeVerts[0];
+		Voxel b = CubeVerts[1];
+		Voxel c = CubeVerts[2];
+		Voxel d = CubeVerts[3];
+	
 		int cellType = 0;
-		if (a.state)
+		for(int i = 0, t = 1; i < CubeVerts.Length; i++, t = t*2)
 		{
-			cellType |= 1;
-		}
-		if (b.state)
-		{
-			cellType |= 2;
-		}
-		if (c.state)
-		{
-			cellType |= 4;
-		}
-		if (d.state)
-		{
-			cellType |= 8;
+			if (CubeVerts[i].state)
+				cellType |= t;
 		}
 
 		switch (cellType)
