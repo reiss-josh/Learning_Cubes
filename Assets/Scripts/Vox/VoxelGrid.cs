@@ -52,12 +52,12 @@ public class VoxelGrid : MonoBehaviour
 	//creates a voxel at a given (x,y,z)
 	private void CreateVoxel(int i, int x, int y, int z)
 	{
-		GameObject newVoxel = Instantiate(voxelPrefab) as GameObject;
+		GameObject newVoxel = Instantiate(voxelPrefab) as GameObject; //newVoxel is a 3D Voxel object. These exist purely for visualization.
 		newVoxel.transform.parent = transform;
 		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, (z + 0.5f) * voxelSize);
 		newVoxel.transform.localScale = Vector3.one * voxelSize * 0.1f;
 		voxelMaterials[i] = newVoxel.GetComponent<MeshRenderer>().material; //paintCode;
-		voxels[i] = new Voxel(x, y, z, voxelSize);
+		voxels[i] = new Voxel(new Vector3(x, y, z), voxelSize);
 	}
 
 	//sets a given voxel to some state
@@ -109,10 +109,11 @@ public class VoxelGrid : MonoBehaviour
 	//edit for 3d
 	private void TriangulateCellRows() {
 		int cells = resolution - 1;
-		for (int i = 0, z = 0; z < cells; z++, i++) {
-			for (int y = 0; y < cells; y++, i++) {
+		for (int i = 0, z = 0; z < cells; z++) {
+			for (int y = 0; y < cells; y++) {
 				for (int x = 0; x < cells; x++, i++) {
-					Voxel[] passArr = genDefaultVerts(i);
+					Voxel[] passArr = genDefaultVerts(x + y*resolution + z*resSqr);
+					Debug.Log("checking cell # " + i + ", pos= " + passArr[0].position);
 					TriangulateCell(passArr);
 				}
 			}
@@ -123,7 +124,8 @@ public class VoxelGrid : MonoBehaviour
 	{
 		int cellType = 0;
 		for (int i = 0, t = 1; i < CubeVerts.Length; i++, t = t * 2) {
-			if (CubeVerts[i].state) {
+			if (CubeVerts[i].state)
+			{
 				if (i == 2 || i == 6)
 					cellType |= t * 2;
 				else if (i == 3 || i == 7)
@@ -131,10 +133,13 @@ public class VoxelGrid : MonoBehaviour
 				else
 					cellType |= t;
 			}
+			//Debug.Log(i + ", is " + CubeVerts[i].state + "cell, " + cellType);
 		}
 
-		Vector3 v0pos = CubeVerts[0].position;
+		Vector3 v0pos = CubeVerts[0].voxT;
 		int[] stitchEdges = triTable[cellType];
+		//if (cellType > 0) Debug.Log("tri, " + cellType + "orig, " + v0pos);
+		//if (cellType > 0) ArrLog(stitchEdges);
 		for (int i = 0; i < 15; i+=3) {
 			if (stitchEdges[i] < 0) {
 				i = 16; break;
@@ -144,8 +149,18 @@ public class VoxelGrid : MonoBehaviour
 			Vector3 edge2 = edgeTable[stitchEdges[i+2]];
 			AddTriangle(v0pos + vHSize * edge0, v0pos + vHSize * edge1, v0pos + vHSize * edge2);
 		}
+	}
 
-		if (cellType > 0) Debug.Log("tri," + cellType);
+	private void ArrLog<T>(T[] arr)
+	{
+		string str = "";
+		foreach (var elt in arr)
+		{
+			str += elt;
+			str += ", ";
+			
+		}
+		Debug.Log(str);
 	}
 
 	private void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
@@ -158,7 +173,7 @@ public class VoxelGrid : MonoBehaviour
 		triangles.Add(vertexIndex + 1);
 		triangles.Add(vertexIndex + 2);
 
-		//not sure if next part is necessary
+		//not sure if next part is necessary -- fairly certain, though
 		vertexIndex = vertices.Count;
 		vertices.Add(a);
 		vertices.Add(b);

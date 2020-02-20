@@ -6,12 +6,14 @@ public class Voxel
 {
 	public bool state;
 	public Vector3 position;
+	public Vector3 voxT;
 
-	public Voxel(int x, int y, int z, float size)
+	public Voxel(Vector3 pos, float size)
 	{
-		position.x = (x + 0.5f) * size;
-		position.y = (y + 0.5f) * size;
-		position.z = (z + 0.5f) * size;
+		position = pos;
+		voxT.x = (pos.x + 0.5f) * size;
+		voxT.y = (pos.y + 0.5f) * size;
+		voxT.z = (pos.z + 0.5f) * size;
 	}
 
 	//empty fallback initializer
