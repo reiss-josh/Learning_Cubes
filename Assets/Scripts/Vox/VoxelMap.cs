@@ -33,10 +33,10 @@ public class VoxelMap : MonoBehaviour
 	private void Update()
 	{
 		//color with mouse
-		if (Input.GetMouseButton(0)) {
+		if (Input.GetMouseButtonDown(0)) {
 			PerfEdit(true);
 		}
-		if (Input.GetMouseButton(1)) {
+		if (Input.GetMouseButtonDown(1)) {
 			PerfEdit(false);
 		}
 		//update all chunks with space
