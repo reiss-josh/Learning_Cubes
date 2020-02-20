@@ -190,7 +190,7 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: voxelResolution
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
