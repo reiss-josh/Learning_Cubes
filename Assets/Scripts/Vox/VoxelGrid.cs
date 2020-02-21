@@ -42,7 +42,7 @@ public class VoxelGrid : MonoBehaviour
 			}
 		}
 
-		SetVoxelColors(); //paint code
+		//SetVoxelColors(); //paint code
 
 		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		mesh.name = "VoxelGrid Mesh";
@@ -55,11 +55,13 @@ public class VoxelGrid : MonoBehaviour
 	private void CreateVoxel(int i, int x, int y, int z)
 	{
 		//all of this is just for visualization
+		/*
 		GameObject newVoxel = Instantiate(voxelPrefab) as GameObject; //newVoxel is a 3D Voxel object. These exist purely for visualization.
 		newVoxel.transform.parent = transform;
 		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, (z + 0.5f) * voxelSize);
 		newVoxel.transform.localScale = Vector3.one * voxelSize * 0.1f;
 		voxelMaterials[i] = newVoxel.GetComponent<MeshRenderer>().material; //paintCode;
+		*/
 		
 		//this is where the magic happens
 		voxels[i] = new Voxel(new Vector3(x, y, z), voxelSize);
@@ -68,22 +70,12 @@ public class VoxelGrid : MonoBehaviour
 	//sets a given voxel to some state
 	public void SetVoxel(int x, int y, int z, float input)
 	{
-		voxels[z * resSqr + y * resolution + x].value += input;
-		SetVoxelColors();
-	}
-
-	//iterates over all voxels -- for a given state, set a given color
-	private void SetVoxelColors() //paint code
-	{
-		for (int i = 0; i < voxels.Length; i++) {
-			voxelMaterials[i].color = selectColor(voxels[i].value);
-		}
+		voxels[z * resSqr + y * resolution + x].value = input;
 	}
 
 	//update all voxels in this chunk
 	public void Refresh()
 	{
-		SetVoxelColors();
 		Triangulate();
 	}
 
@@ -118,7 +110,7 @@ public class VoxelGrid : MonoBehaviour
 			for (int y = 0; y < cells; y++) {
 				for (int x = 0; x < cells; x++, i++) {
 					Voxel[] passArr = genDefaultVerts(x + y*resolution + z*resSqr);
-					Debug.Log("checking cell # " + i + ", pos= " + passArr[0].position);
+					//Debug.Log("checking cell # " + i + ", pos= " + passArr[0].position);
 					TriangulateCell(passArr);
 				}
 			}

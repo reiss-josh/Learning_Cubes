@@ -15,7 +15,8 @@ public class Voxel
 		voxT.y = (pos.y + 0.5f) * size;
 		voxT.z = (pos.z + 0.5f) * size;
 		if(val == -1)
-			value = UnityEngine.Random.Range(0.0f, 1.0f);
+			value = Density.Sample(voxT);
+		Debug.Log(value);
 	}
 
 	//empty fallback initializer
