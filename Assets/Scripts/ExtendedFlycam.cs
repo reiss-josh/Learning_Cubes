@@ -37,7 +37,7 @@ public class ExtendedFlycam : MonoBehaviour
 
 	void Update()
 	{
-		if (Input.GetKey(KeyCode.LeftControl))
+		if (Input.GetKey(KeyCode.C))
 		{
 			rotationX += Input.GetAxis("Mouse X") * cameraSensitivity * Time.deltaTime;
 			rotationY += Input.GetAxis("Mouse Y") * cameraSensitivity * Time.deltaTime;
