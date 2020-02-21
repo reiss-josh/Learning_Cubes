@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class VoxelMap : MonoBehaviour
 {
+	public float threshold = 0.5f;
 	public float size = 2f;
 	public int voxelResolution = 8;
 	public int chunkResolution = 2;
@@ -33,11 +34,11 @@ public class VoxelMap : MonoBehaviour
 	private void Update()
 	{
 		//color with mouse
-		if (Input.GetMouseButtonDown(0)) {
-			PerfEdit(true);
+		if (Input.GetMouseButton(0)) {
+			PerfEdit(0.1f);
 		}
-		if (Input.GetMouseButtonDown(1)) {
-			PerfEdit(false);
+		if (Input.GetMouseButton(1)) {
+			PerfEdit(-0.1f);
 		}
 		//update all chunks with space
 		if (Input.GetKeyDown("space")) {
@@ -47,7 +48,7 @@ public class VoxelMap : MonoBehaviour
 		}
 	}
 
-	private void PerfEdit(bool stateChange)
+	private void PerfEdit(float stateChange)
 	{
 		RaycastHit hitInfo;
 		if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
@@ -57,7 +58,7 @@ public class VoxelMap : MonoBehaviour
 		}
 	}
 
-	private void EditVoxels(Vector3 point, bool stateChange)
+	private void EditVoxels(Vector3 point, float stateChange)
 	{
 		Vector3 pointEdit = (point + (Vector3.one * halfSize)) / voxelSize;
 		Vector3Int voxelXYZ = new Vector3Int((int)pointEdit.x, (int)pointEdit.y, (int)pointEdit.z);
@@ -77,7 +78,7 @@ public class VoxelMap : MonoBehaviour
 	private void CreateChunk(int i, int x, int y, int z)
 	{
 		VoxelGrid chunk = Instantiate(voxelGridPrefab) as VoxelGrid;
-		chunk.Initialize(voxelResolution, chunkSize);
+		chunk.Initialize(voxelResolution, chunkSize, threshold);
 		chunk.transform.parent = transform;
 		chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize, z * chunkSize - halfSize);
 		chunks[i] = chunk;

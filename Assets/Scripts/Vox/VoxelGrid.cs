@@ -8,6 +8,7 @@ public class VoxelGrid : MonoBehaviour
 	public GameObject voxelPrefab;
 	public int resolution;
 	public int size;
+	public float threshold;
 	private int resSqr;
 
 	private static int [][] triTable = Lookup.triangulation;
@@ -20,10 +21,11 @@ public class VoxelGrid : MonoBehaviour
 	private Mesh mesh;
 
 	//this function takes some resolution (how many cubes per chunk), and some size (the size of the cubes)
-	public void Initialize(int resolution, float size)
+	public void Initialize(int resolution, float size, float thresh)
 	{
 		this.resolution = resolution;
 		this.resSqr = (resolution * resolution);
+		this.threshold = thresh;
 		voxelSize = size / resolution;
 		vHSize = voxelSize / 2;
 		gridSize = size;
@@ -52,18 +54,21 @@ public class VoxelGrid : MonoBehaviour
 	//creates a voxel at a given (x,y,z)
 	private void CreateVoxel(int i, int x, int y, int z)
 	{
+		//all of this is just for visualization
 		GameObject newVoxel = Instantiate(voxelPrefab) as GameObject; //newVoxel is a 3D Voxel object. These exist purely for visualization.
 		newVoxel.transform.parent = transform;
 		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, (z + 0.5f) * voxelSize);
 		newVoxel.transform.localScale = Vector3.one * voxelSize * 0.1f;
 		voxelMaterials[i] = newVoxel.GetComponent<MeshRenderer>().material; //paintCode;
+		
+		//this is where the magic happens
 		voxels[i] = new Voxel(new Vector3(x, y, z), voxelSize);
 	}
 
 	//sets a given voxel to some state
-	public void SetVoxel(int x, int y, int z, bool state)
+	public void SetVoxel(int x, int y, int z, float input)
 	{
-		voxels[z * resSqr + y * resolution + x].state = state;
+		voxels[z * resSqr + y * resolution + x].value += input;
 		SetVoxelColors();
 	}
 
@@ -71,7 +76,7 @@ public class VoxelGrid : MonoBehaviour
 	private void SetVoxelColors() //paint code
 	{
 		for (int i = 0; i < voxels.Length; i++) {
-			voxelMaterials[i].color = voxels[i].state ? Color.black : Color.white;
+			voxelMaterials[i].color = selectColor(voxels[i].value);
 		}
 	}
 
@@ -124,7 +129,7 @@ public class VoxelGrid : MonoBehaviour
 	{
 		int cellType = 0;
 		for (int i = 0, t = 1; i < CubeVerts.Length; i++, t = t * 2) {
-			if (CubeVerts[i].state)
+			if (CubeVerts[i].value > threshold)
 			{
 				if (i == 2 || i == 6)
 					cellType |= t * 2;
@@ -181,5 +186,10 @@ public class VoxelGrid : MonoBehaviour
 		triangles.Add(vertexIndex);
 		triangles.Add(vertexIndex + 1);
 		triangles.Add(vertexIndex + 2);
+	}
+
+	private Color selectColor(float input)
+	{
+		return new Color(input, input, input);
 	}
 }

@@ -4,16 +4,18 @@ using System;
 [Serializable]
 public class Voxel
 {
-	public bool state;
+	public float value;
 	public Vector3 position;
 	public Vector3 voxT;
 
-	public Voxel(Vector3 pos, float size)
+	public Voxel(Vector3 pos, float size, float val = -1)
 	{
 		position = pos;
 		voxT.x = (pos.x + 0.5f) * size;
 		voxT.y = (pos.y + 0.5f) * size;
 		voxT.z = (pos.z + 0.5f) * size;
+		if(val == -1)
+			value = UnityEngine.Random.Range(0.0f, 1.0f);
 	}
 
 	//empty fallback initializer
