@@ -190,7 +190,7 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: voxelResolution
-      value: 16
+      value: 32
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
@@ -200,12 +200,12 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: threshold
-      value: -4
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: size
-      value: 8
+      value: 16
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: edf82e33388aa884daa69cef13c0a9a2, type: 3}
