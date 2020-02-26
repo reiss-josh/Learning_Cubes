@@ -3,46 +3,55 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SelectionBase]
-public class VoxelGrid : MonoBehaviour
+public class Chunk : MonoBehaviour
 {
-	public GameObject voxelPrefab;
 	public int resolution;
 	public int size;
 	public float threshold;
 	private int resSqr;
+	public float[] vValues;
+	public Vector3[] vCoords;
 
 	private static int [][] triTable = Lookup.triangulation;
 	private static Vector3[] edgeTable = Lookup.edges;
-	public Voxel[] voxels;
-	private float voxelSize, gridSize, vHSize;
+	private float voxelSize, vHSize;
 	private List<Vector3> vertices;
 	private List<int> triangles;
-	private Material[] voxelMaterials;
 	private Mesh mesh;
+	private MeshCollider theMeshCollider;
 
 	//this function takes some resolution (how many cubes per chunk), and some size (the size of the cubes)
-	public void Initialize(int resolution, float size, float thresh)
+	public void Initialize(int res, float size, float thresh)
 	{
-		this.resolution = resolution;
-		this.resSqr = (resolution * resolution);
-		this.threshold = thresh;
+		theMeshCollider = GetComponent<MeshCollider>();
+		theMeshCollider.sharedMesh = null;
+		resolution = res;
+		resSqr = (resolution * resolution);
+		threshold = thresh;
 		voxelSize = size / resolution;
 		vHSize = voxelSize / 2;
-		gridSize = size;
 
-		voxels = new Voxel[resolution * resSqr];
-		voxelMaterials = new Material[voxels.Length]; //paint code
+		vCoords = new Vector3[resolution * resSqr];
+		vValues = new float[resolution * resSqr];
+		float newVal;
+		float currMin = 0;
+		float currMax = 0;
 
 		//create voxels at all points in chunk
 		for (int i = 0, z = 0; z < resolution; z++) {
 			for (int y = 0; y < resolution; y++) {
 				for (int x = 0; x < resolution; x++, i++) {
-					CreateVoxel(i, x, y, z);
+					vCoords[i] = new Vector3(x+0.5f, y+0.5f, z+0.5f)*voxelSize;
+					newVal = Density.Sample(vCoords[i] + transform.localPosition);
+					vValues[i] = newVal;
+					if (newVal < currMin) currMin = newVal;
+					else if (newVal > currMax) currMax = newVal;
 				}
 			}
 		}
-
-		//SetVoxelColors(); //paint code
+		Debug.Log("("+currMin + ", " + currMax+")");
+		Debug.Log(transform.parent.position);
+		Debug.Log(transform.localPosition);
 
 		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		mesh.name = "VoxelGrid Mesh";
@@ -51,32 +60,12 @@ public class VoxelGrid : MonoBehaviour
 		Refresh();
 	}
 
-	//creates a voxel at a given (x,y,z)
-	private void CreateVoxel(int i, int x, int y, int z)
-	{
-		//all of this is just for visualization
-		/*
-		GameObject newVoxel = Instantiate(voxelPrefab) as GameObject; //newVoxel is a 3D Voxel object. These exist purely for visualization.
-		newVoxel.transform.parent = transform;
-		newVoxel.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, (z + 0.5f) * voxelSize);
-		newVoxel.transform.localScale = Vector3.one * voxelSize * 0.1f;
-		voxelMaterials[i] = newVoxel.GetComponent<MeshRenderer>().material; //paintCode;
-		*/
-		
-		//this is where the magic happens
-		voxels[i] = new Voxel(new Vector3(x, y, z), voxelSize);
-	}
-
-	//sets a given voxel to some state
-	public void SetVoxel(int x, int y, int z, float input)
-	{
-		voxels[z * resSqr + y * resolution + x].value = input;
-	}
-
 	//update all voxels in this chunk
 	public void Refresh()
 	{
+		theMeshCollider.sharedMesh = null;
 		Triangulate();
+		theMeshCollider.sharedMesh = mesh;
 	}
 
 	private void Triangulate()
@@ -91,37 +80,36 @@ public class VoxelGrid : MonoBehaviour
 		mesh.triangles = triangles.ToArray();
 	}
 
-	private Voxel[] genDefaultVerts(int i)
+	private int[] genDefaultVerts(int i)
 	{
-		return new Voxel[] {voxels[i], //0
-							voxels[i + 1], //1
-							voxels[i + resolution], //2
-							voxels[i + resolution + 1], //3
-							voxels[i + resSqr], //4
-							voxels[i + resSqr + 1], //5
-							voxels[i + resSqr + resolution], //6
-							voxels[i + resSqr + resolution + 1]}; //7
+		return new int[8] {
+			i, //0
+			i + 1, //1
+			i + resolution, //2
+			i + resolution + 1, //3
+			i + resSqr, //4
+			i + resSqr + 1, //5
+			i + resSqr + resolution, //6
+			i + resSqr + resolution + 1}; //7
 	}
 
-	//edit for 3d
 	private void TriangulateCellRows() {
 		int cells = resolution - 1;
 		for (int i = 0, z = 0; z < cells; z++) {
 			for (int y = 0; y < cells; y++) {
 				for (int x = 0; x < cells; x++, i++) {
-					Voxel[] passArr = genDefaultVerts(x + y*resolution + z*resSqr);
-					//Debug.Log("checking cell # " + i + ", pos= " + passArr[0].position);
+					int[] passArr = genDefaultVerts(x + y*resolution + z*resSqr);
 					TriangulateCell(passArr);
 				}
 			}
 		}
 	}
 
-	private void TriangulateCell(Voxel[] CubeVerts)
+	private void TriangulateCell(int[] CubeVerts)
 	{
 		int cellType = 0;
 		for (int i = 0, t = 1; i < CubeVerts.Length; i++, t = t * 2) {
-			if (CubeVerts[i].value > threshold)
+			if (vValues[CubeVerts[i]] > threshold)
 			{
 				if (i == 2 || i == 6)
 					cellType |= t * 2;
@@ -130,13 +118,10 @@ public class VoxelGrid : MonoBehaviour
 				else
 					cellType |= t;
 			}
-			//Debug.Log(i + ", is " + CubeVerts[i].state + "cell, " + cellType);
 		}
 
-		Vector3 v0pos = CubeVerts[0].voxT;
+		Vector3 v0pos = vCoords[CubeVerts[0]];
 		int[] stitchEdges = triTable[cellType];
-		//if (cellType > 0) Debug.Log("tri, " + cellType + "orig, " + v0pos);
-		//if (cellType > 0) ArrLog(stitchEdges);
 		for (int i = 0; i < 15; i+=3) {
 			if (stitchEdges[i] < 0) {
 				i = 16; break;

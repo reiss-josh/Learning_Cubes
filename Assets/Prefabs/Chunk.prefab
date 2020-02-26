@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 6025315535429627256}
   - component: {fileID: 2050823902834752674}
   - component: {fileID: 3973597140700275799}
-  - component: {fileID: -5133835735285286955}
+  - component: {fileID: 204125579034459676}
   m_Layer: 0
-  m_Name: VoxelGrid
+  m_Name: Chunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,11 +46,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c509060f535d5d044bfe9b5841556696, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  voxelPrefab: {fileID: 4584554225718123269, guid: 9502a5cfc7636f941b57d2cfbd63a83e,
-    type: 3}
   resolution: 8
   size: 0
-  voxels: []
+  threshold: 0
+  vValues: []
+  vCoords: []
 --- !u!23 &2050823902834752674
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -97,7 +97,7 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7566837362472166155}
   m_Mesh: {fileID: 0}
---- !u!64 &-5133835735285286955
+--- !u!64 &204125579034459676
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

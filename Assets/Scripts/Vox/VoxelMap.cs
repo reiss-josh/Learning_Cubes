@@ -8,9 +8,9 @@ public class VoxelMap : MonoBehaviour
 	public float size = 2f;
 	public int voxelResolution = 8;
 	public int chunkResolution = 2;
-	public VoxelGrid voxelGridPrefab;
+	public Chunk chunkPrefab;
 
-	private VoxelGrid[] chunks;
+	private Chunk[] chunks;
 	private float chunkSize, voxelSize, halfSize;
 
 	private void Awake()
@@ -18,7 +18,7 @@ public class VoxelMap : MonoBehaviour
 		halfSize = size * 0.5f;
 		chunkSize = size / chunkResolution;
 		voxelSize = chunkSize / voxelResolution;
-		chunks = new VoxelGrid[chunkResolution * chunkResolution * chunkResolution];
+		chunks = new Chunk[chunkResolution * chunkResolution * chunkResolution];
 
 		for (int i = 0, z = 0; z < chunkResolution; z++) {
 			for (int y = 0; y < chunkResolution; y++) {
@@ -29,22 +29,12 @@ public class VoxelMap : MonoBehaviour
 		}
 	}
 
-	private void Update()
-	{
-		//update all chunks with space
-		if (Input.GetKeyDown("space")) {
-			for (int i = 0; i < chunks.Length; i++) {
-				chunks[i].Refresh();
-			}
-		}
-	}
-
 	private void CreateChunk(int i, int x, int y, int z)
 	{
-		VoxelGrid chunk = Instantiate(voxelGridPrefab) as VoxelGrid;
-		chunk.Initialize(voxelResolution, chunkSize, threshold);
+		Chunk chunk = Instantiate(chunkPrefab) as Chunk;
 		chunk.transform.parent = transform;
 		chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize, z * chunkSize - halfSize);
+		chunk.Initialize(voxelResolution, chunkSize, threshold);	
 		chunks[i] = chunk;
 	}
 }

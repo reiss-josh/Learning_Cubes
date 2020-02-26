@@ -192,6 +192,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.x
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8524773650482154403, guid: edf82e33388aa884daa69cef13c0a9a2,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8524773650482154403, guid: edf82e33388aa884daa69cef13c0a9a2,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: voxelResolution
@@ -200,18 +210,24 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: chunkResolution
-      value: 1
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: threshold
-      value: -1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: size
-      value: 16
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
+        type: 3}
+      propertyPath: chunkPrefab
+      value: 
+      objectReference: {fileID: 6025315535429627256, guid: 522c0805e1d4d784d8ff82986bc06a1e,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: edf82e33388aa884daa69cef13c0a9a2, type: 3}
 --- !u!1 &705507993
