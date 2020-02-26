@@ -92,7 +92,7 @@ public class Chunk : MonoBehaviour
 	}
 
 	private void TriangulateCellRows() {
-		int cells = resolution - 1;
+		int cells = resolution-1;
 		for (int i = 0, z = 0; z < cells; z++) {
 			for (int y = 0; y < cells; y++) {
 				for (int x = 0; x < cells; x++, i++) {
