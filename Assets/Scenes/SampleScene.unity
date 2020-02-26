@@ -205,12 +205,12 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: voxelResolution
-      value: 32
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: chunkResolution
-      value: 6
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
@@ -228,6 +228,21 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6025315535429627256, guid: 522c0805e1d4d784d8ff82986bc06a1e,
         type: 3}
+    - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
+        type: 3}
+      propertyPath: chunkXYResolution
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
+        type: 3}
+      propertyPath: chunkZResolution
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
+        type: 3}
+      propertyPath: chunkYResolution
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: edf82e33388aa884daa69cef13c0a9a2, type: 3}
 --- !u!1 &705507993

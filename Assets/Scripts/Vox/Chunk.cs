@@ -5,37 +5,36 @@ using UnityEngine;
 [SelectionBase]
 public class Chunk : MonoBehaviour
 {
-	public int resolution;
-	public int size;
+	public int resolution, size;
 	public float threshold;
-	private int resSqr;
 	public float[] vValues;
 	public Vector3[] vCoords;
 
-	private static int [][] triTable = Lookup.triangulation;
-	private static Vector3[] edgeTable = Lookup.edges;
+	private int resSqr;
 	private float voxelSize, vHSize;
+	private static int[][] triTable = Lookup.triangulation;
+	private static Vector3[] edgeTable = Lookup.edges;
 	private List<Vector3> vertices;
 	private List<int> triangles;
-	private Mesh mesh;
 	private MeshCollider theMeshCollider;
-
+	private Mesh mesh;
+	
 	//this function takes some resolution (how many cubes per chunk), and some size (the size of the cubes)
 	public void Initialize(int res, float size, float thresh)
 	{
-		theMeshCollider = GetComponent<MeshCollider>();
-		theMeshCollider.sharedMesh = null;
 		resolution = res;
-		resSqr = (resolution * resolution);
 		threshold = thresh;
+
+		resSqr = (resolution * resolution);
 		voxelSize = size / resolution;
 		vHSize = voxelSize / 2;
 
+		theMeshCollider = GetComponent<MeshCollider>();
+		theMeshCollider.sharedMesh = null;
+
 		vCoords = new Vector3[resolution * resSqr];
 		vValues = new float[resolution * resSqr];
-		float newVal;
-		float currMin = 0;
-		float currMax = 0;
+		float newVal, currMin = 0, currMax = 0;
 
 		//create voxels at all points in chunk
 		for (int i = 0, z = 0; z < resolution; z++) {
@@ -49,9 +48,7 @@ public class Chunk : MonoBehaviour
 				}
 			}
 		}
-		Debug.Log("("+currMin + ", " + currMax+")");
-		Debug.Log(transform.parent.position);
-		Debug.Log(transform.localPosition);
+		//Debug.Log("("+currMin + ", " + currMax+")");
 
 		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		mesh.name = "VoxelGrid Mesh";
@@ -90,7 +87,8 @@ public class Chunk : MonoBehaviour
 			i + resSqr, //4
 			i + resSqr + 1, //5
 			i + resSqr + resolution, //6
-			i + resSqr + resolution + 1}; //7
+			i + resSqr + resolution + 1  //7
+		};
 	}
 
 	private void TriangulateCellRows() {
@@ -133,18 +131,6 @@ public class Chunk : MonoBehaviour
 		}
 	}
 
-	private void ArrLog<T>(T[] arr)
-	{
-		string str = "";
-		foreach (var elt in arr)
-		{
-			str += elt;
-			str += ", ";
-			
-		}
-		Debug.Log(str);
-	}
-
 	private void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
 	{
 		int vertexIndex = vertices.Count;
@@ -163,10 +149,5 @@ public class Chunk : MonoBehaviour
 		triangles.Add(vertexIndex);
 		triangles.Add(vertexIndex + 1);
 		triangles.Add(vertexIndex + 2);
-	}
-
-	private Color selectColor(float input)
-	{
-		return new Color(input, input, input);
 	}
 }
