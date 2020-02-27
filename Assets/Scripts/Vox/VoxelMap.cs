@@ -35,7 +35,7 @@ public class VoxelMap : MonoBehaviour
 	{
 		Chunk chunk = Instantiate(chunkPrefab) as Chunk;
 		chunk.transform.parent = transform;
-		chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize, z * chunkSize - halfSize);
+		chunk.transform.position = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize, z * chunkSize - halfSize);
 		chunk.Initialize(voxelResolution, chunkSize, threshold);
 		chunks[i] = chunk;
 	}

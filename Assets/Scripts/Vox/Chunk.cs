@@ -37,7 +37,8 @@ public class Chunk : MonoBehaviour
 		float newVal, currMin = 0, currMax = 0;
 
 		//create voxels at all points in chunk
-		for (int i = 0, z = 0; z < resolution; z++) {
+		int i = 0;
+		for (int z = 0; z < resolution; z++) {
 			for (int y = 0; y < resolution; y++) {
 				for (int x = 0; x < resolution; x++, i++) {
 					vCoords[i] = new Vector3(x+0.5f, y+0.5f, z+0.5f)*voxelSize;
@@ -137,17 +138,13 @@ public class Chunk : MonoBehaviour
 		vertices.Add(c);
 		vertices.Add(b);
 		vertices.Add(a);
-		triangles.Add(vertexIndex);
+
+		triangles.Add(vertexIndex + 0);
 		triangles.Add(vertexIndex + 1);
 		triangles.Add(vertexIndex + 2);
 
-		//not sure if next part is necessary -- fairly certain, though
-		vertexIndex = vertices.Count;
-		vertices.Add(a);
-		vertices.Add(b);
-		vertices.Add(c);
-		triangles.Add(vertexIndex);
-		triangles.Add(vertexIndex + 1);
 		triangles.Add(vertexIndex + 2);
+		triangles.Add(vertexIndex + 1);
+		triangles.Add(vertexIndex + 0);
 	}
 }
