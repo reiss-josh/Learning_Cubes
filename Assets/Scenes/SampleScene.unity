@@ -135,12 +135,12 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: voxelResolution
-      value: 16
+      value: 32
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: chunkResolution
-      value: 16
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
@@ -171,7 +171,7 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: chunkYResolution
-      value: 16
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154403, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
