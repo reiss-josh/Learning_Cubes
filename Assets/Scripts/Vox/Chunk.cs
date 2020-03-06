@@ -146,7 +146,14 @@ public class Chunk : MonoBehaviour
 		densityShader.SetFloat("vS", voxelSize);
 		densityShader.Dispatch(0, resolution, resolution, resolution);
 
-		//pointsBuffer.SetData(voxels, 0, 0, numPoints);
+		Vector4[] beep = new Vector4[resolution * resSqr];
+		pointsBuffer.GetData(beep);
+		Debug.Log(beep[0]+","+ voxels[0]);
+		Debug.Log(beep[1]+ "," + voxels[1]);
+		Debug.Log(beep[2]+ "," + voxels[2]);
+		Debug.Log(beep[7]+ "," + voxels[7]);
+		//pointsBuffer.SetData(beep, 0, 0, numPoints);
+		pointsBuffer.SetData(voxels, 0, 0, numPoints);
 
 		triangleBuffer.SetCounterValue(0);
 		shader.SetBuffer(0, "voxels", pointsBuffer);

@@ -1,4 +1,4 @@
-﻿#pragma kernel CSMain
+﻿#pragma kernel Density
 #include "/Includes/HLSL_Noise/ClassicNoise3D.hlsl"
 
 static const int numThreads = 8;
@@ -17,19 +17,15 @@ int indexFromCoord(int x, int y, int z) {
 }
 
 [numthreads(numThreads, numThreads, numThreads)]
-void CSMain (int3 id : SV_DispatchThreadID)
+void Density(int3 id : SV_DispatchThreadID)
 {
-    // Stop one point before the end because voxel includes neighbouring points
-    if (id.x >= resolution || id.y >= resolution || id.z >= resolution) {
-        return;
-    }
-    float3 tfL = { tfx, tfy, tfz };
-    int ysave = id.y;
-    
-    float density = -ysave;
-    density += cnoise(id.xyz + tfL);
-    density += cnoise(id.xyz + tfL * 2) * 0.5;
-    int i = indexFromCoord(id.x, id.y, id.z);
-    float4 newVox = {(id.x + 0.5) * vS, (id.y + 0.5) * vS,  (id.z + 0.5) * vS, density };
-    voxels[i] = newVox;
+	float3 tfL = { tfx, tfy, tfz };
+	float density = -id.y;
+	density += cnoise(id.xyz + tfL);
+	
+	int i = indexFromCoord(id.x, id.y, id.z);
+	voxels[i].x = id.x;
+	voxels[i].y = id.y;
+	voxels[i].z = id.z;
+	voxels[i].w = density;
 }
