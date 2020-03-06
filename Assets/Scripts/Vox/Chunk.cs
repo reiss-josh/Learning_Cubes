@@ -71,7 +71,7 @@ public class Chunk : MonoBehaviour
 		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		mesh.name = "VoxelGrid Mesh";
 
-		BuildBuffers();
+		
 
 		//create voxels at all points in chunk -- this ought to be converted to a shader
 		st.Start();
@@ -92,6 +92,8 @@ public class Chunk : MonoBehaviour
 		st.Stop();
 		Debug.Log(string.Format("voxels took {0} ms to complete", st.ElapsedMilliseconds));
 		st.Reset();
+
+		BuildBuffers();
 
 		//do the actual marching
 		st.Start();
@@ -140,20 +142,22 @@ public class Chunk : MonoBehaviour
 	{
 		densityShader.SetBuffer(0, "voxels", pointsBuffer);
 		densityShader.SetInt("resolution", resolution);
-		densityShader.SetFloat("tfx", transform.localPosition.x);
-		densityShader.SetFloat("tfy", transform.localPosition.y);
-		densityShader.SetFloat("tfz", transform.localPosition.z);
-		densityShader.SetFloat("vS", voxelSize);
+		densityShader.SetFloat("tfx", transform.localPosition.x*10);
+		densityShader.SetFloat("tfy", transform.localPosition.y*10);
+		densityShader.SetFloat("tfz", transform.localPosition.z*10);
+		densityShader.SetFloat("vS", voxelSize*10);
 		densityShader.Dispatch(0, resolution, resolution, resolution);
 
 		Vector4[] beep = new Vector4[resolution * resSqr];
 		pointsBuffer.GetData(beep);
-		Debug.Log(beep[0]+","+ voxels[0]);
-		Debug.Log(beep[1]+ "," + voxels[1]);
-		Debug.Log(beep[2]+ "," + voxels[2]);
-		Debug.Log(beep[7]+ "," + voxels[7]);
-		//pointsBuffer.SetData(beep, 0, 0, numPoints);
-		pointsBuffer.SetData(voxels, 0, 0, numPoints);
+		for(int i = 0; i < beep.Length; i++)
+		{
+			if (ToVector3(beep[i]) != ToVector3(voxels[i]))
+				Debug.Log(beep[i]+ "," +voxels[i]);
+			beep[i].w = voxels[i].w;
+		}
+		pointsBuffer.SetData(beep, 0, 0, numPoints);
+		//pointsBuffer.SetData(voxels, 0, 0, numPoints);
 
 		triangleBuffer.SetCounterValue(0);
 		shader.SetBuffer(0, "voxels", pointsBuffer);

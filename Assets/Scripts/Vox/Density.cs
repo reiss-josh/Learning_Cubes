@@ -9,6 +9,7 @@ public static class Density
     public static float Sample(Vector3 ws)
     {
         float density = -ws.y;
+        //Debug.Log(density);
         density += Noise.Perlin3D(ws, freq);
         density += Noise.Perlin3D(ws * 2, freq) * 0.5f;
         return density;
