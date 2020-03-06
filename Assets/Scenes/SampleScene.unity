@@ -140,7 +140,7 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: chunkResolution
-      value: 8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
@@ -171,7 +171,7 @@ PrefabInstance:
     - target: {fileID: 8524773650482154402, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}
       propertyPath: chunkYResolution
-      value: 8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8524773650482154403, guid: edf82e33388aa884daa69cef13c0a9a2,
         type: 3}

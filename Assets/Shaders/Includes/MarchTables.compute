@@ -1,5 +1,23 @@
 ﻿// Values from http://paulbourke.net/geometry/polygonise/
 
+
+static const float3 edgeTable[12] = { //array of Vector3s from vertex 0
+        {1,0,0}, //0
+        {2,1,0}, //1
+        {1,2,0}, //2
+        {0,1,0}, //3
+
+        {1,0,2}, //4
+        {2,1,2}, //5
+        {1,2,2}, //6
+        {0,1,2}, //7
+
+        {0,0,1}, //8
+        {2,0,1}, //9
+        {2,2,1}, //10
+        {0,2,1} //11
+};
+
 static const int edges[256] = {
     0x0,
     0x109,
@@ -259,7 +277,7 @@ static const int edges[256] = {
     0x0
 };
 
-static const int triangulation[256][16] = {
+static const int triTable[256][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
     { 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
     { 0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },

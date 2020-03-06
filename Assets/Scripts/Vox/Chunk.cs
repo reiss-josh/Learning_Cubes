@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 [SelectionBase]
 public class Chunk : MonoBehaviour
 {
@@ -34,10 +35,13 @@ public class Chunk : MonoBehaviour
 	public float threshold;
 	public Vector4[] voxels;
 	public ComputeShader shader;
+	public ComputeShader densityShader;
 	private ComputeBuffer pointsBuffer;
 	private ComputeBuffer triCountBuffer;
 	private ComputeBuffer triangleBuffer;
 
+	private int numPoints;
+	private int maxTriangleCount;
 	private int resSqr;
 	private float voxelSize, vHSize;
 	private static int[][] triTable = Lookup.triangulation;
@@ -46,10 +50,15 @@ public class Chunk : MonoBehaviour
 	private List<int> triangles;
 	private MeshCollider theMeshCollider;
 	private Mesh mesh;
-	
+
+	private System.Diagnostics.Stopwatch st;
 	//this function takes some resolution (how many cubes per chunk), and some size (the size of the cubes)
 	public void Initialize(int res, float size, float thresh)
 	{
+		st = new System.Diagnostics.Stopwatch();
+		vertices = new List<Vector3>();
+		triangles = new List<int>();
+
 		resolution = res;
 		threshold = thresh;
 
@@ -59,11 +68,15 @@ public class Chunk : MonoBehaviour
 
 		theMeshCollider = GetComponent<MeshCollider>();
 		theMeshCollider.sharedMesh = null;
+		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
+		mesh.name = "VoxelGrid Mesh";
 
+		BuildBuffers();
+
+		//create voxels at all points in chunk -- this ought to be converted to a shader
+		st.Start();
 		voxels = new Vector4[resolution * resSqr];
 		float newVal, currMin = 0, currMax = 0;
-
-		//create voxels at all points in chunk
 		int i = 0;
 		for (int z = 0; z < resolution; z++) {
 			for (int y = 0; y < resolution; y++) {
@@ -76,13 +89,16 @@ public class Chunk : MonoBehaviour
 				}
 			}
 		}
-		//Debug.Log("("+currMin + ", " + currMax+")");
+		st.Stop();
+		Debug.Log(string.Format("voxels took {0} ms to complete", st.ElapsedMilliseconds));
+		st.Reset();
 
-		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
-		mesh.name = "VoxelGrid Mesh";
-		vertices = new List<Vector3>();
-		triangles = new List<int>();
+		//do the actual marching
+		st.Start();
 		Refresh();
+		st.Stop();
+		Debug.Log(string.Format("tris took {0} ms to complete", st.ElapsedMilliseconds));
+		st.Reset();
 	}
 
 	//update all voxels in this chunk
@@ -100,6 +116,15 @@ public class Chunk : MonoBehaviour
 			ReleaseBuffers();
 		}
 	}
+	
+	void BuildBuffers()
+	{
+		numPoints = resolution * resSqr;
+		maxTriangleCount = numPoints * 5 * 2;
+		triangleBuffer = new ComputeBuffer(maxTriangleCount, sizeof(float) * 3 * 3, ComputeBufferType.Append);
+		pointsBuffer = new ComputeBuffer(numPoints, sizeof(float) * 4);
+		triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+	}
 
 	void ReleaseBuffers()
 	{
@@ -113,21 +138,22 @@ public class Chunk : MonoBehaviour
 
 	private void Triangulate()
 	{
+		densityShader.SetBuffer(0, "voxels", pointsBuffer);
+		densityShader.SetInt("resolution", resolution);
+		densityShader.SetFloat("tfx", transform.localPosition.x);
+		densityShader.SetFloat("tfy", transform.localPosition.y);
+		densityShader.SetFloat("tfz", transform.localPosition.z);
+		densityShader.SetFloat("vS", voxelSize);
+		densityShader.Dispatch(0, resolution, resolution, resolution);
 
-		//TriangulateCellRows();
-		int numPoints = voxels.Length;
-		int maxTriangleCount = numPoints * 5;
-		triangleBuffer = new ComputeBuffer(maxTriangleCount, sizeof(float) * 3 * 3, ComputeBufferType.Append);
-		pointsBuffer = new ComputeBuffer(numPoints, sizeof(float) * 4);
-		triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
-
-		pointsBuffer.SetData(voxels, 0, 0, numPoints);
+		//pointsBuffer.SetData(voxels, 0, 0, numPoints);
 
 		triangleBuffer.SetCounterValue(0);
 		shader.SetBuffer(0, "voxels", pointsBuffer);
 		shader.SetBuffer(0, "tris", triangleBuffer);
-		shader.SetInt("numPointsPerAxis", resolution);
+		shader.SetInt("resolution", resolution);
 		shader.SetFloat("isoLevel", threshold);
+		shader.SetFloat("vHSize", vHSize);
 
 		shader.Dispatch(0, resolution, resolution, resolution);
 
@@ -158,32 +184,6 @@ public class Chunk : MonoBehaviour
 		mesh.triangles = meshTriangles;
 
 		mesh.RecalculateNormals();
-	}
-
-	private int[] genDefaultVerts(int i)
-	{
-		return new int[8] {
-			i, //0
-			i + 1, //1
-			i + resolution, //2
-			i + resolution + 1, //3
-			i + resSqr, //4
-			i + resSqr + 1, //5
-			i + resSqr + resolution, //6
-			i + resSqr + resolution + 1  //7
-		};
-	}
-
-	private void TriangulateCellRows() {
-		int cells = resolution-1;
-		for (int i = 0, z = 0; z < cells; z++) {
-			for (int y = 0; y < cells; y++) {
-				for (int x = 0; x < cells; x++, i++) {
-					int[] passArr = genDefaultVerts(x + y*resolution + z*resSqr);
-					TriangulateCell(passArr);
-				}
-			}
-		}
 	}
 
 	private void TriangulateCell(int[] CubeVerts)
