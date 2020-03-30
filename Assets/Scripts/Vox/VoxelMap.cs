@@ -5,12 +5,13 @@ using UnityEngine;
 public class VoxelMap : MonoBehaviour
 {
 	public float threshold = 0.5f;	//threshold for points in space
-	public float voxelSize = 2f;			//size of a voxel across each axis
+	public float voxelSize = 2f;    //size of a voxel across each axis
+	public float divisor = 0.05f;	//the float for affecting how strong the gradient is
 	public int voxelResolution = 8; //num voxels per chunk, per axis
 	public int chunkResolution = 2; //num chunks per axis
 	public Chunk chunkPrefab;       //prefab for chunk
 
-	public ComputeShader shader;			//shader??
+	public ComputeShader marchShader;			//marching cubes shader
 	public ComputeShader densityShader;		//density shader -- generates "w" for each voxel
 	private ComputeBuffer pointsBuffer;		//stores all points in space
 	private ComputeBuffer triCountBuffer;	//keeps count of number of tris in a chunk
@@ -19,19 +20,17 @@ public class VoxelMap : MonoBehaviour
 	private int numPoints;                  //stores number of points
 	private int maxTriangleCount;           //determines max # of triangles in a chunk
 	private int chunkResSqr, voxelResSqr;   //res^2
-	private static int[][] triTable = Lookup.triangulation;
-	private static Vector3[] edgeTable = Lookup.edges;
 
 	private Chunk[] chunks;	//array of chunks
 	private float chunkSize, voxelHalfSize;
 
-	private System.Diagnostics.Stopwatch st;
-	private System.Diagnostics.Stopwatch st2;
+	private System.Diagnostics.Stopwatch chunkTimer, chunkOuter; //timers for benchmarking
+
 	//setup variables for chunk generation
 	private void Awake()
 	{
-		st = new System.Diagnostics.Stopwatch();
-		st2 = new System.Diagnostics.Stopwatch();
+		chunkTimer = new System.Diagnostics.Stopwatch();
+		chunkOuter = new System.Diagnostics.Stopwatch();
 		chunkResSqr = chunkResolution * chunkResolution;
 		voxelResSqr = voxelResolution * voxelResolution;
 		voxelHalfSize = voxelSize * 0.5f;	 //used to find midpoint of a chunk
@@ -46,26 +45,25 @@ public class VoxelMap : MonoBehaviour
 	//create all chunks in mesh
 	private void GenerateChunks()
 	{
-		float sumGood = 0;
-		float sumGarb = 0;
+		float sumChunks = 0;
 		//i is current chunk ID
 		//x,y,z is integer chunk position in world mesh
+		chunkOuter.Start();
 		for (int i = 0, z = 0; z < chunkResolution; z++) {
 			for (int y = 0; y < chunkResolution; y++) {
 				for (int x = 0; x < chunkResolution; x++, i++) {
-					st2.Start();
+					chunkTimer.Start();
 					CreateChunk(i, x, y, z);
-					st2.Stop();
-					sumGood += st2.ElapsedMilliseconds;
-					sumGarb += st.ElapsedMilliseconds;
-					st2.Reset();
-					st.Reset();
+					sumChunks += chunkTimer.ElapsedMilliseconds;
+					chunkTimer.Stop();
+					chunkTimer.Reset();
 				}
 			}
 		}
-		sumGood -= sumGarb;
-		Debug.Log(string.Format("voxels took {0} ms to complete", sumGood));
-		Debug.Log(string.Format("garbage took {0} ms to complete", sumGarb));
+		chunkOuter.Stop();
+		Debug.Log(string.Format("The chunk code took {0} ms to complete", sumChunks));
+		Debug.Log(string.Format("The chunk code took {0} ms to complete", chunkOuter.ElapsedMilliseconds));
+		chunkOuter.Reset();
 	}
 
 	//generate a single chunk
@@ -82,11 +80,13 @@ public class VoxelMap : MonoBehaviour
 		Triangulate(i);
 	}
 
+	//gets a chunk id from a coordinate
 	private int chunkIDFromCoord(int x, int y, int z)
 	{
 		return x + (y * chunkResolution) + (z * chunkResSqr);
 	}
 
+	//the big ol' driver code
 	private void Triangulate(int iD)
 	{
 		Chunk currChunk = chunks[iD];
@@ -94,42 +94,21 @@ public class VoxelMap : MonoBehaviour
 		BuildBuffers();
 		densityShader.SetBuffer(0, "voxels", pointsBuffer);
 		densityShader.SetInt("voxRes", voxelResolution);
-		//densityShader.SetFloat("voxMid", voxelResolution * 0.5f); //EXPECTED TO BE AN INTEGER
-		//densityShader.SetFloat("chunkMid", chunkResolution * 0.5f); //EXPECTED TO BE AN INTEGER
 		densityShader.SetFloat("tfx", currChunk.transform.position.x*10);
 		densityShader.SetFloat("tfy", currChunk.transform.position.y*10);
 		densityShader.SetFloat("tfz", currChunk.transform.position.z*10);
-		densityShader.SetFloat("vS", voxelSize * 10);
-		densityShader.Dispatch(0, voxelResolution, voxelResolution, voxelResolution);
-
-		st.Start();
-		//look inside the points!
-		Vector4[] beep = new Vector4[voxelResolution * voxelResSqr];
-		pointsBuffer.GetData(beep);
-
-		for (int i = 0; i < beep.Length; i++)
-		{
-			Debug.Log(beep[i].w);
-			var newVal = Density.Sample(ToVector3(beep[i])/100+currChunk.transform.localPosition/100);
-			beep[i].w = newVal;
-			//Debug.Log(newVal);
-
-			//GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			//cube.transform.position = ToVector3(beep[i]);
-			//cube.transform.localScale = new Vector3(voxelSize*0.5f, voxelSize*0.5f, voxelSize*0.5f);
-		}
-		pointsBuffer.SetData(beep, 0, 0, numPoints);
-		st.Stop();
-		
+		densityShader.SetFloat("voxelSize", voxelSize * 10);
+		densityShader.SetFloat("divisor", divisor * 10);
+		densityShader.Dispatch(0, voxelResolution, voxelResolution, voxelResolution);	
 
 		triangleBuffer.SetCounterValue(0);
-		shader.SetBuffer(0, "voxels", pointsBuffer);
-		shader.SetBuffer(0, "tris", triangleBuffer);
-		shader.SetInt("resolution", voxelResolution);
-		shader.SetFloat("isoLevel", threshold);
-		shader.SetFloat("vHSize", voxelHalfSize);
+		marchShader.SetBuffer(0, "voxels", pointsBuffer);
+		marchShader.SetBuffer(0, "tris", triangleBuffer);
+		marchShader.SetInt("resolution", voxelResolution);
+		marchShader.SetFloat("isoLevel", threshold);
+		marchShader.SetFloat("vHSize", voxelHalfSize);
 
-		shader.Dispatch(0, voxelResolution, voxelResolution, voxelResolution);
+		marchShader.Dispatch(0, voxelResolution, voxelResolution, voxelResolution);
 
 		// Get number of triangles in the triangle buffer
 		ComputeBuffer.CopyCount(triangleBuffer, triCountBuffer, 0);
