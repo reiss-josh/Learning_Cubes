@@ -78,7 +78,9 @@ void March(int3 id : SV_DispatchThreadID)
         tri.vertB = interpolateVerts(CubeVerts[a1], CubeVerts[b1]);
         tri.vertC = interpolateVerts(CubeVerts[a2], CubeVerts[b2]);
         tris.Append(tri);
+        tri.vertC = interpolateVerts(CubeVerts[a0], CubeVerts[b0]);
+        tri.vertB = interpolateVerts(CubeVerts[a1], CubeVerts[b1]);
+        tri.vertA = interpolateVerts(CubeVerts[a2], CubeVerts[b2]);
+        tris.Append(tri);
     }
-
-
 }
