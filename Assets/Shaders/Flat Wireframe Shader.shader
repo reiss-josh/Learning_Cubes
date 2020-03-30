@@ -88,7 +88,7 @@
 
 			#define FORWARD_BASE_PASS
 
-			#include "/Includes/MyFlatWireframe.cginc"
+			#include "/Includes/WireFrame/MyFlatWireframe.cginc"
 
 			ENDCG
 		}
@@ -123,7 +123,7 @@
 			#pragma fragment MyFragmentProgram
 			#pragma geometry MyGeometryProgram
 
-			#include "/Includes/MyFlatWireframe.cginc"
+			#include "/Includes/WireFrame/MyFlatWireframe.cginc"
 
 			ENDCG
 		}
@@ -161,7 +161,7 @@
 
 			#define DEFERRED_PASS
 
-			#include "/Includes/MyFlatWireframe.cginc"
+			#include "/Includes/WireFrame/MyFlatWireframe.cginc"
 
 			ENDCG
 		}
@@ -188,7 +188,7 @@
 			#pragma vertex MyShadowVertexProgram
 			#pragma fragment MyShadowFragmentProgram
 
-			#include "/Includes/My Shadows.cginc"
+			#include "/Includes/WireFrame/My Shadows.cginc"
 
 			ENDCG
 		}
@@ -211,7 +211,7 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 
-			#include "/Includes/My Lightmapping.cginc"
+			#include "/Includes/WireFrame/My Lightmapping.cginc"
 
 			ENDCG
 		}

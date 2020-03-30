@@ -25,9 +25,13 @@ public class VoxelMap : MonoBehaviour
 	private Chunk[] chunks;	//array of chunks
 	private float chunkSize, voxelHalfSize;
 
+	private System.Diagnostics.Stopwatch st;
+	private System.Diagnostics.Stopwatch st2;
 	//setup variables for chunk generation
 	private void Awake()
 	{
+		st = new System.Diagnostics.Stopwatch();
+		st2 = new System.Diagnostics.Stopwatch();
 		chunkResSqr = chunkResolution * chunkResolution;
 		voxelResSqr = voxelResolution * voxelResolution;
 		voxelHalfSize = voxelSize * 0.5f;	 //used to find midpoint of a chunk
@@ -42,15 +46,26 @@ public class VoxelMap : MonoBehaviour
 	//create all chunks in mesh
 	private void GenerateChunks()
 	{
+		float sumGood = 0;
+		float sumGarb = 0;
 		//i is current chunk ID
 		//x,y,z is integer chunk position in world mesh
 		for (int i = 0, z = 0; z < chunkResolution; z++) {
 			for (int y = 0; y < chunkResolution; y++) {
 				for (int x = 0; x < chunkResolution; x++, i++) {
+					st2.Start();
 					CreateChunk(i, x, y, z);
+					st2.Stop();
+					sumGood += st2.ElapsedMilliseconds;
+					sumGarb += st.ElapsedMilliseconds;
+					st2.Reset();
+					st.Reset();
 				}
 			}
 		}
+		sumGood -= sumGarb;
+		Debug.Log(string.Format("voxels took {0} ms to complete", sumGood));
+		Debug.Log(string.Format("garbage took {0} ms to complete", sumGarb));
 	}
 
 	//generate a single chunk
@@ -61,7 +76,7 @@ public class VoxelMap : MonoBehaviour
 		chunks[i] = chunk;
 
 		chunk.transform.parent = transform;
-		chunk.transform.position = new Vector3(x*chunkSize, y*chunkSize, z*chunkSize); //placeholder -- assumes only one chunk
+		chunk.transform.position = new Vector3(x*chunkSize-x*voxelSize, y*chunkSize-y*voxelSize, z*chunkSize-z*voxelSize); //placeholder -- assumes only one chunk
 
 		chunk.Initialize(x,y,z);
 		Triangulate(i);
@@ -79,25 +94,33 @@ public class VoxelMap : MonoBehaviour
 		BuildBuffers();
 		densityShader.SetBuffer(0, "voxels", pointsBuffer);
 		densityShader.SetInt("voxRes", voxelResolution);
-		densityShader.SetFloat("voxMid", voxelResolution * 0.5f); //EXPECTED TO BE AN INTEGER
-		densityShader.SetFloat("chunkMid", chunkResolution * 0.5f); //EXPECTED TO BE AN INTEGER
-		densityShader.SetFloat("tfx", currChunk.transform.localPosition.x*10);
-		densityShader.SetFloat("tfy", currChunk.transform.localPosition.y*10);
-		densityShader.SetFloat("tfz", currChunk.transform.localPosition.z*10);
+		//densityShader.SetFloat("voxMid", voxelResolution * 0.5f); //EXPECTED TO BE AN INTEGER
+		//densityShader.SetFloat("chunkMid", chunkResolution * 0.5f); //EXPECTED TO BE AN INTEGER
+		densityShader.SetFloat("tfx", currChunk.transform.position.x*10);
+		densityShader.SetFloat("tfy", currChunk.transform.position.y*10);
+		densityShader.SetFloat("tfz", currChunk.transform.position.z*10);
 		densityShader.SetFloat("vS", voxelSize * 10);
-		densityShader.SetFloat("cS", chunkSize * 10);
 		densityShader.Dispatch(0, voxelResolution, voxelResolution, voxelResolution);
 
+		st.Start();
 		//look inside the points!
 		Vector4[] beep = new Vector4[voxelResolution * voxelResSqr];
 		pointsBuffer.GetData(beep);
+
 		for (int i = 0; i < beep.Length; i++)
 		{
-			Debug.Log(beep[i]);
-			GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			cube.transform.position = ToVector3(beep[i]);
-			cube.transform.localScale = new Vector3(voxelSize*0.5f, voxelSize*0.5f, voxelSize*0.5f);
+			Debug.Log(beep[i].w);
+			var newVal = Density.Sample(ToVector3(beep[i])/100+currChunk.transform.localPosition/100);
+			beep[i].w = newVal;
+			//Debug.Log(newVal);
+
+			//GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			//cube.transform.position = ToVector3(beep[i]);
+			//cube.transform.localScale = new Vector3(voxelSize*0.5f, voxelSize*0.5f, voxelSize*0.5f);
 		}
+		pointsBuffer.SetData(beep, 0, 0, numPoints);
+		st.Stop();
+		
 
 		triangleBuffer.SetCounterValue(0);
 		shader.SetBuffer(0, "voxels", pointsBuffer);

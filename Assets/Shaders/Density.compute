@@ -1,16 +1,14 @@
 ﻿#pragma kernel Density
 #include "/Includes/HLSL_Noise/ClassicNoise3D.hlsl"
-
+//#include "/Includes/GLSL_Noise.compute"
 static const int numThreads = 8;
 
 
 RWStructuredBuffer<float4> voxels; //buffer of voxels (a coordinate + float value)
 
 int voxRes;
-float voxMid;
-float chunkMid;
+//float voxMid;
 float vS;
-float cS;
 float tfx;
 float tfy;
 float tfz;
@@ -26,13 +24,13 @@ void Density(int3 id : SV_DispatchThreadID)
 		return;
 	}
 	double vSize = vS / 10;
-	double cSize = cS / 10;
-	double3 tfL = { tfx/10, tfy/10, tfz/10 };
-	double3 voxCenterCorrection = { voxMid - 0.5f, voxMid - 0.5f, voxMid - 0.5f };
-	double3 chunkCenterCorrection = { 0,0,0}; //not implemented
-	double3 ws = (id - voxCenterCorrection) * vSize + (tfL - chunkCenterCorrection);
+	//double3 tfL = { tfx/10, tfy/10, tfz/10 };
+	//double3 voxCenterCorrection = { voxMid - 0.5f, voxMid - 0.5f, voxMid - 0.5f };
+	//double3 chunkCenterCorrection = { 0,0,0}; //not implemented
+	double3 ws = (id) * vSize;
 	double density = 0;
-	//density = cnoise(ws.xyz * 2);
+	density += cnoise(ws.xyz);
+	//density = snoise(ws.xyz);
 	
 	int i = indexFromCoord(id.x, id.y, id.z);
 	voxels[i].x = (ws.x);
