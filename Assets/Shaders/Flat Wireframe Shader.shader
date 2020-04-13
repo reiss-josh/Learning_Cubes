@@ -1,4 +1,5 @@
-﻿Shader "Custom/Flat Wireframe" {
+﻿//This shader taken from https://catlikecoding.com/unity/tutorials/advanced-rendering/flat-and-wireframe-shading/
+Shader "Custom/Flat Wireframe" {
 
 	Properties {
 		_Color ("Tint", Color) = (1, 1, 1, 1)

@@ -44,9 +44,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   threshold: 0.5
-  size: 2
+  voxelSize: 2
+  divisor: 0.05
   voxelResolution: 8
   chunkResolution: 2
-  chunkYResolution: 2
   chunkPrefab: {fileID: 6025315535429627256, guid: 522c0805e1d4d784d8ff82986bc06a1e,
     type: 3}
+  marchShader: {fileID: 7200000, guid: 807b7047cac958c4a975867f04a5fd54, type: 3}
+  densityShader: {fileID: 7200000, guid: 7fb92b9aea53ba54ca8ea85ee5ab06c0, type: 3}
