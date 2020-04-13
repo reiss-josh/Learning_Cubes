@@ -1,4 +1,5 @@
-﻿Shader "Custom/Flat Wireframe" {
+﻿//This shader taken from https://catlikecoding.com/unity/tutorials/advanced-rendering/flat-and-wireframe-shading/
+Shader "Custom/Flat Wireframe" {
 
 	Properties {
 		_Color ("Tint", Color) = (1, 1, 1, 1)
@@ -88,7 +89,7 @@
 
 			#define FORWARD_BASE_PASS
 
-			#include "MyFlatWireframe.cginc"
+			#include "/Includes/WireFrame/MyFlatWireframe.cginc"
 
 			ENDCG
 		}
@@ -123,7 +124,7 @@
 			#pragma fragment MyFragmentProgram
 			#pragma geometry MyGeometryProgram
 
-			#include "MyFlatWireframe.cginc"
+			#include "/Includes/WireFrame/MyFlatWireframe.cginc"
 
 			ENDCG
 		}
@@ -161,7 +162,7 @@
 
 			#define DEFERRED_PASS
 
-			#include "MyFlatWireframe.cginc"
+			#include "/Includes/WireFrame/MyFlatWireframe.cginc"
 
 			ENDCG
 		}
@@ -188,7 +189,7 @@
 			#pragma vertex MyShadowVertexProgram
 			#pragma fragment MyShadowFragmentProgram
 
-			#include "My Shadows.cginc"
+			#include "/Includes/WireFrame/My Shadows.cginc"
 
 			ENDCG
 		}
@@ -211,7 +212,7 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 
-			#include "My Lightmapping.cginc"
+			#include "/Includes/WireFrame/My Lightmapping.cginc"
 
 			ENDCG
 		}
