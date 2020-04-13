@@ -12,10 +12,6 @@ public class GridOfGrids : MonoBehaviour
 	private void Awake()
 	{
 		StartCoroutine(Generate());
-		foreach (Vector3 v in vertices)
-		{
-			Debug.Log(v);
-		}
 		//xSize = xSize * vRes;
 		//ySize = ySize * vRes;
 		//zSize = zSize * vRes;
@@ -90,7 +86,7 @@ public class GridOfGrids : MonoBehaviour
 		}
 	}
 
-
+	//https://answers.unity.com/questions/938178/3d-perlin-noise.html
 	public static float PerlinNoise3D(float x, float y, float z)
 	{
 		y += 1;

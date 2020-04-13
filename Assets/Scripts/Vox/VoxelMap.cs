@@ -61,8 +61,8 @@ public class VoxelMap : MonoBehaviour
 			}
 		}
 		chunkOuter.Stop();
-		Debug.Log(string.Format("The chunk code took {0} ms to complete", sumChunks));
-		Debug.Log(string.Format("The chunk code took {0} ms to complete", chunkOuter.ElapsedMilliseconds));
+		Debug.Log(string.Format("The inner chunk code took {0} ms to complete", sumChunks));
+		Debug.Log(string.Format("The outer chunk code took {0} ms to complete", chunkOuter.ElapsedMilliseconds));
 		chunkOuter.Reset();
 	}
 
@@ -76,7 +76,7 @@ public class VoxelMap : MonoBehaviour
 		chunk.transform.parent = transform;
 		chunk.transform.position = new Vector3(x*chunkSize-x*voxelSize, y*chunkSize-y*voxelSize, z*chunkSize-z*voxelSize); //placeholder -- assumes only one chunk
 
-		chunk.Initialize(x,y,z);
+		chunk.Initialize(x,y,z,i,this);
 		Triangulate(i);
 	}
 
@@ -87,10 +87,11 @@ public class VoxelMap : MonoBehaviour
 	}
 
 	//the big ol' driver code
-	private void Triangulate(int iD)
+	public void Triangulate(int iD)
 	{
 		Chunk currChunk = chunks[iD];
 		currChunk.chunkMeshCollider.sharedMesh = null;
+		currChunk.chunkMesh.Clear();
 		BuildBuffers();
 		densityShader.SetBuffer(0, "voxels", pointsBuffer);
 		densityShader.SetInt("voxRes", voxelResolution);
@@ -107,7 +108,6 @@ public class VoxelMap : MonoBehaviour
 		marchShader.SetInt("resolution", voxelResolution);
 		marchShader.SetFloat("isoLevel", threshold);
 		marchShader.SetFloat("vHSize", voxelHalfSize);
-
 		marchShader.Dispatch(0, voxelResolution, voxelResolution, voxelResolution);
 
 		// Get number of triangles in the triangle buffer
@@ -119,8 +119,6 @@ public class VoxelMap : MonoBehaviour
 		// Get triangle data from shader
 		Triangle[] tris = new Triangle[numTris];
 		triangleBuffer.GetData(tris, 0, 0, numTris);
-
-		currChunk.chunkMesh.Clear();
 
 		var vertices = new Vector3[numTris * 3];
 		var chunkMeshTriangles = new int[numTris * 3];
@@ -165,23 +163,24 @@ public class VoxelMap : MonoBehaviour
 		}
 	}
 
+	//rewritten from seblague in a way i understand
 	struct Triangle
 	{
-		#pragma warning disable 649 // disable unassigned variable warning
-		public Vector3 a; //position of first vert
+		public Vector3 a;
 		public Vector3 b;
 		public Vector3 c;
-		public Vector3 this[int i] {
-			get {
-				switch (i) {
-					case 0:
-						return a;
-					case 1:
-						return b;
-					default:
-						return c;
-				}
+		public Vector3 this[int i]
+		{	get {
+				if(i == 0) {return a;}
+				else if(i == 1) {return b;}
+				else {return c;}
 			}
+		}
+		public void zeroSelf() //include to prevent "a,b,c never assigned" warning
+		{
+			this.a = Vector3.zero;
+			this.b = Vector3.zero;
+			this.c = Vector3.zero;
 		}
 	}
 }
