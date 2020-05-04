@@ -6,3 +6,7 @@ The "Interactive Cubes" branch contains multiple prefabs that are helpful for ex
 Vertices hidden            |  Vertices visible
 :-------------------------:|:-------------------------:
 ![](noCubes.png)  |  ![](withCubes.png)
+
+![](imgs/img1.png)
+![](imgs/img2.png)
+![](imgs/img3.png)
